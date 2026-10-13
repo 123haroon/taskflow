@@ -77,6 +77,9 @@ git merge feature/update-heading
 - **Pull request:** Push a feature branch and open a PR on GitHub.
 
 > **Note:** `.env` files containing real secrets should not be pushed. This app does not need any environment variables.
+> ## Git Practice
+
+Learning Git fetch, cherry-pick, rebase, reset, and revert.
 
 ## Upcoming Features
 
