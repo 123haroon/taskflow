@@ -11,8 +11,6 @@ A responsive todo dashboard built with **React, TypeScript, Vite, Tailwind CSS v
 - Search tasks by title or description
 - Progress overview and completion percentage
 - Light / dark mode
-- Browser localStorage persistence (no backend required)
-- Mobile-friendly layout
 
 ## Getting started
 
@@ -79,3 +77,9 @@ git merge feature/update-heading
 - **Pull request:** Push a feature branch and open a PR on GitHub.
 
 > **Note:** `.env` files containing real secrets should not be pushed. This app does not need any environment variables.
+
+## Upcoming Features
+
+- Task counter
+- Task categories
+- Task reminders

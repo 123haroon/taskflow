@@ -23,6 +23,7 @@ import {
 
 type Priority = "High" | "Medium" | "Low";
 type Filter = "All tasks" | "In progress" | "Completed";
+
 type Task = {
   id: string;
   title: string;
@@ -73,8 +74,10 @@ const exampleTasks: Task[] = [
 function getInitialTasks(): Task[] {
   try {
     const saved = localStorage.getItem(TASKS_KEY);
+
     if (saved !== null) {
       const parsed: unknown = JSON.parse(saved);
+
       if (Array.isArray(parsed)) {
         return parsed.filter(
           (task): task is Task =>
@@ -91,6 +94,7 @@ function getInitialTasks(): Task[] {
   } catch {
     /* Local storage can be unavailable or invalid. */
   }
+
   return exampleTasks;
 }
 
@@ -101,6 +105,7 @@ function getInitialTheme(): boolean {
   } catch {
     /* Ignore unavailable storage. */
   }
+
   return false;
 }
 
@@ -135,6 +140,7 @@ export default function App() {
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<Priority>("Medium");
   const [formError, setFormError] = useState("");
+
   const titleRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -147,9 +153,11 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
+
     document
       .querySelector('meta[name="theme-color"]')
       ?.setAttribute("content", dark ? "#151a17" : "#f7f8f5");
+
     try {
       localStorage.setItem(THEME_KEY, dark ? "dark" : "light");
     } catch {
@@ -161,8 +169,15 @@ export default function App() {
     if (showForm) titleRef.current?.focus();
   }, [showForm]);
 
+  // Task statistics
   const completed = tasks.filter((task) => task.completed).length;
   const remaining = tasks.length - completed;
+
+  // NEW FEATURE: High Priority Pending Tasks Counter
+  const highPriorityPending = tasks.filter(
+    (task) => task.priority === "High" && !task.completed,
+  ).length;
+
   const progress = tasks.length
     ? Math.round((completed / tasks.length) * 100)
     : 0;
@@ -174,9 +189,11 @@ export default function App() {
           const matchesFilter =
             filter === "All tasks" ||
             (filter === "Completed" ? task.completed : !task.completed);
+
           const matchesQuery = `${task.title} ${task.description}`
             .toLowerCase()
             .includes(query.trim().toLowerCase());
+
           return matchesFilter && matchesQuery;
         })
         .sort(
@@ -189,11 +206,13 @@ export default function App() {
 
   function addTask(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     if (!title.trim()) {
       setFormError("Please enter a task title.");
       titleRef.current?.focus();
       return;
     }
+
     const task: Task = {
       id: crypto.randomUUID(),
       title: title.trim(),
@@ -202,6 +221,7 @@ export default function App() {
       completed: false,
       createdAt: Date.now(),
     };
+
     setTasks((current) => [task, ...current]);
     setTitle("");
     setDescription("");
@@ -255,6 +275,7 @@ export default function App() {
                 taskflow<span className="text-[#4a9669]">.</span>
               </span>
             </div>
+
             <button
               aria-label="Close navigation"
               onClick={() => setMobileMenuOpen(false)}
@@ -267,10 +288,12 @@ export default function App() {
           <div className="mt-14 px-3 text-[10px] font-bold uppercase tracking-[.18em] text-[#a4ada4]">
             Workspace
           </div>
+
           <nav aria-label="Task filters" className="mt-4 space-y-1.5">
             {filters.map((item, index) => {
               const Icon =
                 index === 0 ? LayoutList : index === 1 ? Clock3 : CheckCheck;
+
               return (
                 <button
                   key={item}
@@ -296,6 +319,7 @@ export default function App() {
           <div className="mt-12 px-3 text-[10px] font-bold uppercase tracking-[.18em] text-[#a4ada4]">
             Preferences
           </div>
+
           <button
             onClick={() => setDark((current) => !current)}
             className="mt-4 flex items-center gap-3 rounded-xl px-3.5 py-3 text-left text-[13px] font-semibold text-[#7c887d] hover:bg-[#f6f8f5] dark:hover:bg-[#29372d] dark:hover:text-white"
@@ -318,6 +342,7 @@ export default function App() {
                 Small steps turn big plans into reality.
               </p>
             </div>
+
             <div className="mt-7 flex items-center gap-3 px-1">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#e0e9df] text-xs font-bold text-[#3c7550] dark:bg-[#36463a] dark:text-[#c3dfc9]">
                 H
@@ -351,11 +376,13 @@ export default function App() {
                 >
                   <Menu size={20} />
                 </button>
+
                 <div className="flex items-center gap-2 text-xs font-semibold text-[#819183] dark:text-[#9bad9d]">
                   <CalendarDays size={15} />
                   {dateLabel}
                 </div>
               </div>
+
               <div className="flex items-center gap-3">
                 <button
                   aria-label={`Switch to ${dark ? "light" : "dark"} mode`}
@@ -367,6 +394,7 @@ export default function App() {
                     {dark ? <Sun size={17} /> : <Moon size={17} />}
                   </span>
                 </button>
+
                 <div className="hidden items-center gap-2 rounded-full border border-[#e4ebe2] bg-white py-1.5 pl-1.5 pr-3 text-xs font-bold text-[#476b51] sm:flex dark:border-[#344439] dark:bg-[#223027] dark:text-[#cce6cf]">
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#d8eddf] dark:bg-[#3b5b43]">
                     H
@@ -378,22 +406,26 @@ export default function App() {
 
             <section className="mt-14 sm:mt-17.5">
               <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#e9f3ea] px-3 py-1.5 text-[11px] font-bold text-[#4b9064] dark:bg-[#294533] dark:text-[#a4d8b4]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#57a875]" /> YOUR
-                PRODUCTIVITY SPACE
+                <span className="h-1.5 w-1.5 rounded-full bg-[#57a875]" />
+                YOUR PRODUCTIVITY SPACE
               </div>
+
               <h1 className="heading text-[35px] font-extrabold leading-[1.2] tracking-[-1.9px] sm:text-[46px]">
                 Make today <span className="text-[#4d9369]">count.</span>
                 <span className="ml-1 inline-block align-middle">✳</span>
               </h1>
+
               <p className="mt-3 text-sm leading-7 text-[#89988b] sm:text-[15px] dark:text-[#a6b7aa]">
                 Stay focused, make progress, and celebrate every little win.
               </p>
             </section>
 
+            {/* Progress Dashboard - Updated to 4 cards */}
             <section
               aria-label="Progress overview"
-              className="mt-9 grid gap-4 sm:grid-cols-3"
+              className="mt-9 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
             >
+              {/* Total Tasks */}
               <div className="rounded-2xl border border-[#e6ece4] bg-white px-5 py-5 shadow-[0_4px_20px_rgba(43,68,48,.025)] dark:border-[#354238] dark:bg-[#222c25]">
                 <div className="mb-5 flex items-center justify-between">
                   <span className="text-xs font-semibold text-[#95a095]">
@@ -410,6 +442,8 @@ export default function App() {
                   Tasks on your list
                 </p>
               </div>
+
+              {/* In Progress */}
               <div className="rounded-2xl border border-[#e6ece4] bg-white px-5 py-5 shadow-[0_4px_20px_rgba(43,68,48,.025)] dark:border-[#354238] dark:bg-[#222c25]">
                 <div className="mb-5 flex items-center justify-between">
                   <span className="text-xs font-semibold text-[#95a095]">
@@ -426,6 +460,8 @@ export default function App() {
                   Keep the momentum
                 </p>
               </div>
+
+              {/* Completed */}
               <div className="rounded-2xl border border-[#e6ece4] bg-white px-5 py-5 shadow-[0_4px_20px_rgba(43,68,48,.025)] dark:border-[#354238] dark:bg-[#222c25]">
                 <div className="mb-5 flex items-center justify-between">
                   <span className="text-xs font-semibold text-[#95a095]">
@@ -442,8 +478,27 @@ export default function App() {
                   Little wins add up
                 </p>
               </div>
+
+              {/* NEW: High Priority Pending Counter */}
+              <div className="rounded-2xl border border-[#e6ece4] bg-white px-5 py-5 shadow-[0_4px_20px_rgba(43,68,48,.025)] dark:border-[#354238] dark:bg-[#222c25]">
+                <div className="mb-5 flex items-center justify-between">
+                  <span className="text-xs font-semibold text-[#95a095]">
+                    High Priority Pending
+                  </span>
+                  <div className="rounded-xl bg-rose-50 p-2 text-rose-500 dark:bg-rose-400/10 dark:text-rose-300">
+                    <Focus size={16} />
+                  </div>
+                </div>
+                <p className="heading text-[34px] font-extrabold tracking-[-1px]">
+                  {highPriorityPending.toString().padStart(2, "0")}
+                </p>
+                <p className="mt-1 text-[11px] text-[#9ba99c]">
+                  Important tasks to focus on
+                </p>
+              </div>
             </section>
 
+            {/* Daily Progress */}
             <section className="mt-5 overflow-hidden rounded-2xl bg-[#276e48] p-6 text-white sm:p-7 dark:bg-[#315f41]">
               <div className="flex items-center justify-between gap-4">
                 <div>
@@ -458,6 +513,7 @@ export default function App() {
                     going.
                   </p>
                 </div>
+
                 <div
                   className="heading flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-[5px] border-[#67a983] bg-[#296a48] text-lg font-bold"
                   aria-label={`${progress}% complete`}
@@ -465,6 +521,7 @@ export default function App() {
                   {progress}%
                 </div>
               </div>
+
               <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-white/20">
                 <div
                   className="h-full rounded-full bg-[#b8ebc9] transition-all duration-300"
@@ -473,6 +530,7 @@ export default function App() {
               </div>
             </section>
 
+            {/* Task List */}
             <section className="mt-12">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
@@ -486,6 +544,7 @@ export default function App() {
                     A clear mind starts with a clear list.
                   </p>
                 </div>
+
                 <button
                   onClick={openForm}
                   className="inline-flex items-center gap-2 rounded-xl bg-[#368459] px-5 py-3 text-xs font-bold text-white shadow-[0_6px_14px_rgba(52,132,89,.17)] transition hover:bg-[#287449] active:scale-[.98]"
@@ -506,6 +565,7 @@ export default function App() {
                     </button>
                   ))}
                 </div>
+
                 <div className="relative">
                   <Search
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-[#a0aea2]"
@@ -553,6 +613,7 @@ export default function App() {
                       >
                         {task.completed && <Check size={14} strokeWidth={3} />}
                       </button>
+
                       <div className="min-w-0 flex-1">
                         <h3
                           className={`text-[13px] font-bold leading-5 ${task.completed ? "text-[#a2b0a3] line-through" : "text-[#3b493c] dark:text-[#e5eee5]"}`}
@@ -565,6 +626,7 @@ export default function App() {
                           </p>
                         )}
                       </div>
+
                       <div className="flex shrink-0 items-center gap-2 sm:gap-4">
                         <span
                           className={`rounded-md px-2 py-1 text-[10px] font-bold ring-1 ring-inset ${priorityColor(task.priority)}`}
@@ -600,6 +662,7 @@ export default function App() {
                 )}
               </div>
             </section>
+
             <footer className="mt-16 flex items-center justify-between border-t border-[#e5ece5] pt-5 text-[10px] text-[#a8b4a9] dark:border-[#334238]">
               <span>
                 © {new Date().getFullYear()} TaskFlow. Made for focused minds.
@@ -612,7 +675,7 @@ export default function App() {
         </main>
       </div>
 
-      {/* New task dialog */}
+      {/* New Task Dialog */}
       {showForm && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-[#142419]/60 p-4 backdrop-blur-[3px]"
@@ -638,15 +701,18 @@ export default function App() {
                 <X size={19} />
               </button>
             </div>
+
             <h2
               id="add-task-title"
               className="heading mt-5 text-2xl font-extrabold tracking-[-.6px]"
             >
               Create a new task
             </h2>
+
             <p className="mt-2 text-sm text-[#90a194] dark:text-[#bacabd]">
               One small task, one step closer.
             </p>
+
             <form onSubmit={addTask} className="mt-6 space-y-4">
               <div>
                 <label
@@ -655,6 +721,7 @@ export default function App() {
                 >
                   Task title <span className="text-rose-500">*</span>
                 </label>
+
                 <input
                   id="task-title"
                   ref={titleRef}
@@ -667,12 +734,14 @@ export default function App() {
                   placeholder="e.g. Finish the landing page"
                   className="w-full rounded-xl border border-[#dfe9df] bg-[#fbfcfa] px-4 py-3 text-sm outline-none focus:border-[#6eb288] dark:border-[#455748] dark:bg-[#1b2620]"
                 />
+
                 {formError && (
                   <p role="alert" className="mt-1 text-xs text-rose-500">
                     {formError}
                   </p>
                 )}
               </div>
+
               <div>
                 <label
                   htmlFor="task-desc"
@@ -681,6 +750,7 @@ export default function App() {
                   Description{" "}
                   <span className="font-normal text-[#9eb0a1]">(optional)</span>
                 </label>
+
                 <input
                   id="task-desc"
                   value={description}
@@ -690,8 +760,10 @@ export default function App() {
                   className="w-full rounded-xl border border-[#dfe9df] bg-[#fbfcfa] px-4 py-3 text-sm outline-none focus:border-[#6eb288] dark:border-[#455748] dark:bg-[#1b2620]"
                 />
               </div>
+
               <fieldset>
                 <legend className="mb-2 text-xs font-bold">Priority</legend>
+
                 <div className="grid grid-cols-3 gap-2">
                   {priorities.map((item) => (
                     <button
@@ -706,6 +778,7 @@ export default function App() {
                   ))}
                 </div>
               </fieldset>
+
               <div className="flex gap-3 pt-3">
                 <button
                   type="button"
@@ -714,6 +787,7 @@ export default function App() {
                 >
                   Cancel
                 </button>
+
                 <button
                   type="submit"
                   className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#368459] px-4 py-3 text-sm font-bold text-white hover:bg-[#287449]"
